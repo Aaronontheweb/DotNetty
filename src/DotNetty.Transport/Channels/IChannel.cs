@@ -63,6 +63,8 @@ namespace DotNetty.Transport.Channels
 
         Task WriteAsync(object message);
 
+        Task WriteAsync(object message, TaskCompletionSource<bool> promise);
+
         IChannel Flush();
 
         Task WriteAndFlushAsync(object message);
