@@ -151,7 +151,7 @@ namespace DotNetty.Transport.Channels
             {
                 flags |= SkipFlags.Read;
             }
-            if (IsSkippable(handlerType, nameof(IChannelHandler.WriteAsync), typeof(object)))
+            if (IsSkippable(handlerType, nameof(IChannelHandler.WriteAsync), typeof(object), typeof(TaskCompletionSource)))
             {
                 flags |= SkipFlags.Write;
             }
