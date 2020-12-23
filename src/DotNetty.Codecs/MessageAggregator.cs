@@ -8,6 +8,7 @@ namespace DotNetty.Codecs
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -131,7 +132,7 @@ namespace DotNetty.Codecs
                     this.handlingOversizedMessage = this.IgnoreContentAfterContinueResponse(continueResponse);
 
                     Task task = context
-                        .WriteAndFlushAsync(continueResponse)
+                        .WriteAndFlushAsync(continueResponse, new TaskCompletionSource())
                         .ContinueWith(ContinueResponseWriteAction, context, TaskContinuationOptions.ExecuteSynchronously);
 
                     if (closeAfterWrite)

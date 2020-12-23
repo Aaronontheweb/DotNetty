@@ -417,7 +417,7 @@ namespace DotNetty.Codecs.Http.Tests.Cors
         sealed class EchoHandler : SimpleChannelInboundHandler<object>
         {
             protected override void ChannelRead0(IChannelHandlerContext ctx, object msg) => 
-                ctx.WriteAndFlushAsync(new DefaultFullHttpResponse(HttpVersion.Http11, HttpResponseStatus.OK, true, true));
+                ctx.WriteAndFlushAsync(new DefaultFullHttpResponse(HttpVersion.Http11, HttpResponseStatus.OK, true, true), TaskCompletionSource.Void);
         }
 
         static void AssertValues(IHttpResponse response, string headerName, params string[] values)

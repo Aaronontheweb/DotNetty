@@ -11,6 +11,7 @@ namespace DotNetty.Codecs.Http
     using System.Threading.Tasks;
     using DotNetty.Buffers;
     using DotNetty.Common;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal.Logging;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
@@ -159,7 +160,7 @@ namespace DotNetty.Codecs.Http
                 if (oversized is IFullHttpMessage ||
                     !HttpUtil.Is100ContinueExpected(oversized) && !HttpUtil.IsKeepAlive(oversized))
                 {
-                    ctx.WriteAndFlushAsync(TooLargeClose.RetainedDuplicate()).ContinueWith((t, s) =>
+                    ctx.WriteAndFlushAsync(TooLargeClose.RetainedDuplicate(), new TaskCompletionSource()).ContinueWith((t, s) =>
                         {
                             if (t.IsFaulted)
                             {
@@ -172,7 +173,7 @@ namespace DotNetty.Codecs.Http
                 }
                 else
                 {
-                    ctx.WriteAndFlushAsync(TooLarge.RetainedDuplicate()).ContinueWith((t, s) =>
+                    ctx.WriteAndFlushAsync(TooLarge.RetainedDuplicate(), new TaskCompletionSource()).ContinueWith((t, s) =>
                         {
                             if (t.IsFaulted)
                             {

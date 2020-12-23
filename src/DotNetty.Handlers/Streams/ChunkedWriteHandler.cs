@@ -39,9 +39,9 @@ namespace DotNetty.Handlers.Streams
             }
         }
 
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        public override Task WriteAsync(IChannelHandlerContext context, object message, TaskCompletionSource tcs)
         {
-            var pendingWrite = new PendingWrite(message);
+            var pendingWrite = new PendingWrite(message, tcs);
             this.queue.Enqueue(pendingWrite);
             return pendingWrite.PendingTask;
         }
@@ -218,7 +218,7 @@ namespace DotNetty.Handlers.Streams
                         message = Unpooled.Empty;
                     }
 
-                    Task future = context.WriteAsync(message);
+                    Task future = context.WriteAsync(message, new TaskCompletionSource());
                     if (endOfInput)
                     {
                         this.currentWrite = null;
@@ -284,7 +284,7 @@ namespace DotNetty.Handlers.Streams
                 }
                 else
                 {
-                    context.WriteAsync(pendingMessage)
+                    context.WriteAsync(pendingMessage, new TaskCompletionSource())
                         .ContinueWith((task, state) =>
                             {
                                 var pendingTask = (PendingWrite)state;
@@ -336,10 +336,10 @@ namespace DotNetty.Handlers.Streams
         {
             readonly TaskCompletionSource promise;
 
-            public PendingWrite(object msg)
+            public PendingWrite(object msg, TaskCompletionSource tcs)
             {
                 this.Message = msg;
-                this.promise = new TaskCompletionSource();
+                this.promise = tcs;
             }
 
             public object Message { get; }

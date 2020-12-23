@@ -7,6 +7,7 @@ namespace DotNetty.Codecs.Http.WebSockets.Extensions
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -67,7 +68,7 @@ namespace DotNetty.Codecs.Http.WebSockets.Extensions
             base.ChannelRead(ctx, msg);
         }
 
-        public override Task WriteAsync(IChannelHandlerContext ctx, object msg)
+        public override Task WriteAsync(IChannelHandlerContext ctx, object msg, TaskCompletionSource tcs)
         {
             Action<Task> continuationAction = null;
 
@@ -110,8 +111,8 @@ namespace DotNetty.Codecs.Http.WebSockets.Extensions
             }
 
             return continuationAction == null
-                ? base.WriteAsync(ctx, msg)
-                : base.WriteAsync(ctx, msg)
+                ? base.WriteAsync(ctx, msg, tcs)
+                : base.WriteAsync(ctx, msg, tcs)
                     .ContinueWith(continuationAction, TaskContinuationOptions.ExecuteSynchronously);
         }
     }

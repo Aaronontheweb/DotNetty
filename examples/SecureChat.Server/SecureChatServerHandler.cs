@@ -5,6 +5,7 @@ namespace SecureChat.Server
 {
     using System;
     using System.Net;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
     using DotNetty.Transport.Channels.Groups;
 
@@ -26,7 +27,7 @@ namespace SecureChat.Server
                 }
             }
 
-            contex.WriteAndFlushAsync(string.Format("Welcome to {0} secure chat server!\n", Dns.GetHostName()));
+            contex.WriteAndFlushAsync(string.Format("Welcome to {0} secure chat server!\n", Dns.GetHostName()), TaskCompletionSource.Void);
             g.Add(contex.Channel);
         }
 
@@ -48,7 +49,7 @@ namespace SecureChat.Server
             string broadcast = string.Format("[{0}] {1}\n", contex.Channel.RemoteAddress, msg);
             string response = string.Format("[you] {0}\n", msg);
             group.WriteAndFlushAsync(broadcast, new EveryOneBut(contex.Channel.Id));
-            contex.WriteAndFlushAsync(response);
+            contex.WriteAndFlushAsync(response, TaskCompletionSource.Void);
 
             if (string.Equals("bye", msg, StringComparison.OrdinalIgnoreCase))
             {

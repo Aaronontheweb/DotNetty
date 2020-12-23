@@ -65,7 +65,7 @@ namespace DotNetty.Transport.Channels.Groups
             {
                 if (matcher.Matches(c))
                 {
-                    futures.Add(c, c.WriteAsync(SafeDuplicate(message)));
+                    futures.Add(c, c.WriteAsync(SafeDuplicate(message), new TaskCompletionSource()));
                 }
             }
 
@@ -155,7 +155,7 @@ namespace DotNetty.Transport.Channels.Groups
             {
                 if (matcher.Matches(c))
                 {
-                    futures.Add(c, c.WriteAndFlushAsync(SafeDuplicate(message)));
+                    futures.Add(c, c.WriteAndFlushAsync(SafeDuplicate(message), new TaskCompletionSource()));
                 }
             }
 

@@ -105,7 +105,7 @@ namespace DotNetty.Transport.Tests.Performance.Transport
                     this.counter.Increment();
                     if (this.stopwatch.Elapsed < this.duration)
                     {
-                        context.WriteAndFlushAsync(buffer);
+                        context.WriteAndFlushAsync(buffer, TaskCompletionSource.Void);
                     }
                     else
                     {
@@ -129,7 +129,7 @@ namespace DotNetty.Transport.Tests.Performance.Transport
             {
                 if (message is IByteBuffer buffer)
                 {
-                    context.WriteAndFlushAsync(buffer);
+                    context.WriteAndFlushAsync(buffer, TaskCompletionSource.Void);
                 }
                 else
                 {

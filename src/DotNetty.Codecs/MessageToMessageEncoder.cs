@@ -7,6 +7,7 @@ namespace DotNetty.Codecs
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using DotNetty.Common;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -18,7 +19,7 @@ namespace DotNetty.Codecs
         /// </summary>
         public virtual bool AcceptOutboundMessage(object msg) => msg is T;
 
-        public override Task WriteAsync(IChannelHandlerContext ctx, object msg)
+        public override Task WriteAsync(IChannelHandlerContext ctx, object msg, TaskCompletionSource tcs)
         {
             Task result;
             ThreadLocalObjectList output = null;
@@ -47,16 +48,18 @@ namespace DotNetty.Codecs
                 }
                 else
                 {
-                    return ctx.WriteAsync(msg);
+                    return ctx.WriteAsync(msg, tcs);
                 }
             }
             catch (EncoderException e)
             {
-                return TaskEx.FromException(e);
+                tcs.TrySetException(e);
+                return tcs.Task;
             }
             catch (Exception ex)
             {
-                return TaskEx.FromException(new EncoderException(ex)); // todo: we don't have a stack on EncoderException but it's present on inner exception.
+                tcs.TrySetException(new EncoderException(ex)); // todo: we don't have a stack on EncoderException but it's present on inner exception.
+                return tcs.Task;
             }
             finally
             {
@@ -65,16 +68,16 @@ namespace DotNetty.Codecs
                     int lastItemIndex = output.Count - 1;
                     if (lastItemIndex == 0)
                     {
-                        result = ctx.WriteAsync(output[0]);
+                        result = ctx.WriteAsync(output[0], tcs);
                     }
                     else if (lastItemIndex > 0)
                     {
                         for (int i = 0; i < lastItemIndex; i++)
                         {
                             // we don't care about output from these messages as failure while sending one of these messages will fail all messages up to the last message - which will be observed by the caller in Task result.
-                            ctx.WriteAsync(output[i]); // todo: optimize: once IChannelHandlerContext allows, pass "not interested in task" flag
+                            ctx.WriteAsync(output[i], tcs); // todo: optimize: once IChannelHandlerContext allows, pass "not interested in task" flag
                         }
-                        result = ctx.WriteAsync(output[lastItemIndex]);
+                        result = ctx.WriteAsync(output[lastItemIndex], tcs);
                     }
                     else
                     {

@@ -5,6 +5,7 @@ namespace Discard.Client
 {
     using System;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
     using Examples.Common;
 
@@ -40,7 +41,7 @@ namespace Discard.Client
                 IByteBuffer buffer = Unpooled.WrappedBuffer(this.array);
                 // Flush the outbound buffer to the socket.
                 // Once flushed, generate the same amount of traffic again.
-                await this.ctx.WriteAndFlushAsync(buffer);
+                await this.ctx.WriteAndFlushAsync(buffer, new TaskCompletionSource());
                 this.GenerateTraffic();
             }
             catch

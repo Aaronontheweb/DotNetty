@@ -10,6 +10,7 @@ namespace DotNetty.Handlers.Tests.Flow
     using System.Threading.Tasks;
     using DotNetty.Buffers;
     using DotNetty.Codecs;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Handlers.Flow;
     using DotNetty.Transport.Bootstrapping;
@@ -98,7 +99,7 @@ namespace DotNetty.Handlers.Tests.Flow
 
             try
             {
-                await client.WriteAndFlushAsync(NewOneMessage());
+                await client.WriteAndFlushAsync(NewOneMessage(), new TaskCompletionSource());
 
                 // We received three messages even through auto reading
                 // was turned off after we received the first message.

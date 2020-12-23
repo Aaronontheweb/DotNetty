@@ -10,6 +10,7 @@ namespace HttpServer
     using DotNetty.Transport.Channels;
     using System;
     using DotNetty.Common;
+    using DotNetty.Common.Concurrency;
 
     sealed class HelloServerHandler : ChannelHandlerAdapter
     {
@@ -77,7 +78,7 @@ namespace HttpServer
                     break;
                 default:
                     var response = new DefaultFullHttpResponse(HttpVersion.Http11, HttpResponseStatus.NotFound, Unpooled.Empty, false);
-                    ctx.WriteAndFlushAsync(response);
+                    ctx.WriteAndFlushAsync(response, TaskCompletionSource.Void);
                     ctx.CloseAsync();
                     break;
             }
@@ -94,7 +95,7 @@ namespace HttpServer
             headers.Set(ContentLengthEntity, contentLength);
 
             // Close the non-keep-alive connection after the write operation is done.
-            ctx.WriteAsync(response);
+            ctx.WriteAsync(response, TaskCompletionSource.Void);
         }
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) => context.CloseAsync();

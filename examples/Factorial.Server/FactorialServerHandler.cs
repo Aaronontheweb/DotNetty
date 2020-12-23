@@ -5,6 +5,7 @@ namespace Factorial.Server
 {
     using System;
     using System.Numerics;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
 
     public class FactorialServerHandler : SimpleChannelInboundHandler<BigInteger>
@@ -16,7 +17,7 @@ namespace Factorial.Server
         {
             this.lastMultiplier = msg;
             this.factorial *= msg;
-            ctx.WriteAndFlushAsync(this.factorial);
+            ctx.WriteAndFlushAsync(this.factorial, TaskCompletionSource.Void);
         }
 
         public override void ChannelInactive(IChannelHandlerContext ctx) => Console.WriteLine("Factorial of {0} is: {1}", this.lastMultiplier, this.factorial);

@@ -8,6 +8,7 @@ namespace DotNetty.Handlers.Logging
     using System.Text;
     using System.Threading.Tasks;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal.Logging;
     using DotNetty.Transport.Channels;
 
@@ -251,13 +252,13 @@ namespace DotNetty.Handlers.Logging
             ctx.Read();
         }
 
-        public override Task WriteAsync(IChannelHandlerContext ctx, object msg)
+        public override Task WriteAsync(IChannelHandlerContext ctx, object msg, TaskCompletionSource tcs)
         {
             if (this.Logger.IsEnabled(this.InternalLevel))
             {
                 this.Logger.Log(this.InternalLevel, this.Format(ctx, "WRITE", msg));
             }
-            return ctx.WriteAsync(msg);
+            return ctx.WriteAsync(msg, tcs);
         }
 
         public override void Flush(IChannelHandlerContext ctx)

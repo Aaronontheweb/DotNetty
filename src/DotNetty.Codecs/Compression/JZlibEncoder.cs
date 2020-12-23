@@ -7,6 +7,7 @@ namespace DotNetty.Codecs.Compression
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -241,7 +242,7 @@ namespace DotNetty.Codecs.Compression
                 this.z.next_out = null;
             }
 
-            return context.WriteAndFlushAsync(footer)
+            return context.WriteAndFlushAsync(footer, new TaskCompletionSource())
                 .ContinueWith(_ => context.CloseAsync());
         }
 

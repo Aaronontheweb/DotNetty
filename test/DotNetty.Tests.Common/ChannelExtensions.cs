@@ -5,6 +5,7 @@ namespace DotNetty.Tests.Common
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
 
     public static class ChannelExtensions
@@ -14,7 +15,7 @@ namespace DotNetty.Tests.Common
             var list = new List<Task>();
             foreach (object m in messages)
             {
-                list.Add(channel.WriteAsync(m));
+                list.Add(channel.WriteAsync(m, new TaskCompletionSource()));
             }
             IEnumerable<Task> tasks = list.ToArray();
             channel.Flush();

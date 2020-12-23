@@ -177,6 +177,7 @@ namespace DotNetty.Transport.Channels
 
         public Task DeregisterAsync() => this.pipeline.DeregisterAsync();
 
+
         public IChannel Flush()
         {
             this.pipeline.Flush();
@@ -189,9 +190,13 @@ namespace DotNetty.Transport.Channels
             return this;
         }
 
-        public Task WriteAsync(object msg) => this.pipeline.WriteAsync(msg);
+        public Task WriteAsync(object msg) => this.pipeline.WriteAsync(msg, new TaskCompletionSource());
 
-        public Task WriteAndFlushAsync(object message) => this.pipeline.WriteAndFlushAsync(message);
+        public Task WriteAsync(object msg, TaskCompletionSource tcs) => this.pipeline.WriteAsync(msg, tcs);
+
+        public Task WriteAndFlushAsync(object message, TaskCompletionSource tcs) => this.pipeline.WriteAndFlushAsync(message, tcs);
+
+        public Task WriteAndFlushAsync(object message) => this.pipeline.WriteAndFlushAsync(message, new TaskCompletionSource());
 
         public Task CloseCompletion => this.closeFuture.Task;
 
@@ -670,7 +675,7 @@ namespace DotNetty.Transport.Channels
                 }
             }
 
-            public Task WriteAsync(object msg)
+            public Task WriteAsync(object msg, TaskCompletionSource tcs)
             {
                 this.AssertEventLoop();
 
@@ -684,7 +689,8 @@ namespace DotNetty.Transport.Channels
 
                     // release message now to prevent resource-leak
                     ReferenceCountUtil.Release(msg);
-                    return TaskEx.FromException(new ClosedChannelException());
+                    tcs.TrySetException(new ClosedChannelException());
+                    return tcs.Task;
                 }
 
                 int size;
@@ -701,12 +707,12 @@ namespace DotNetty.Transport.Channels
                 {
                     ReferenceCountUtil.Release(msg);
 
-                    return TaskEx.FromException(t);
+                    tcs.TrySetException(t);
+                    return tcs.Task;
                 }
 
-                var promise = new TaskCompletionSource();
-                outboundBuffer.AddMessage(msg, size, promise);
-                return promise.Task;
+                outboundBuffer.AddMessage(msg, size, tcs);
+                return tcs.Task;
             }
 
             public void Flush()

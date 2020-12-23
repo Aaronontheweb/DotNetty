@@ -182,7 +182,7 @@ namespace DotNetty.Transport.Channels
                 object msg = write.Msg;
                 TaskCompletionSource promise = write.Promise;
                 this.Recycle(write, false);
-                this.ctx.WriteAsync(msg).LinkOutcome(promise);
+                this.ctx.WriteAsync(msg, promise);
                 tasks.Add(promise.Task);
                 write = next;
             }
@@ -208,7 +208,7 @@ namespace DotNetty.Transport.Channels
             object msg = write.Msg;
             TaskCompletionSource promise = write.Promise;
             this.Recycle(write, true);
-            this.ctx.WriteAsync(msg).LinkOutcome(promise);
+            this.ctx.WriteAsync(msg, promise);
             return promise.Task;
         }
 

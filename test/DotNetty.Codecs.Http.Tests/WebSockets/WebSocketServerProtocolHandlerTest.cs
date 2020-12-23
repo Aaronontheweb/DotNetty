@@ -8,6 +8,7 @@ namespace DotNetty.Codecs.Http.Tests.WebSockets
     using System.Text;
     using System.Threading.Tasks;
     using DotNetty.Codecs.Http.WebSockets;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
     using DotNetty.Transport.Channels.Embedded;
@@ -140,10 +141,11 @@ namespace DotNetty.Codecs.Http.Tests.WebSockets
                 this.owner = owner;
             }
 
-            public override Task WriteAsync(IChannelHandlerContext ctx, object msg)
+            public override Task WriteAsync(IChannelHandlerContext ctx, object msg, TaskCompletionSource tcs)
             {
                 this.owner.responses.Enqueue((IFullHttpResponse)msg);
-                return TaskEx.Completed;
+                tcs.Complete();
+                return tcs.Task;
             }
 
             public override void Flush(IChannelHandlerContext ctx)

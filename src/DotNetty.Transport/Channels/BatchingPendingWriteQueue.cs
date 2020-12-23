@@ -64,7 +64,7 @@ namespace DotNetty.Transport.Channels
         }
 
         /// <summary>Add the given <c>msg</c> and returns <see cref="Task" /> for completion of processing <c>msg</c>.</summary>
-        public Task Add(object msg)
+        public Task Add(object msg, TaskCompletionSource tcs)
         {
             Contract.Assert(this.ctx.Executor.InEventLoop);
             Contract.Requires(msg != null);
@@ -82,12 +82,12 @@ namespace DotNetty.Transport.Channels
                 if (canBundle)
                 {
                     currentTail.Add(msg, messageSize);
+                    ((Task)(currentTail.Promise.Task)).LinkOutcome(tcs);
                     return currentTail.Promise.Task;
                 }
             }
 
-            var promise = new TaskCompletionSource();
-            PendingWrite write = PendingWrite.NewInstance(msg, messageSize, promise);
+            PendingWrite write = PendingWrite.NewInstance(msg, messageSize, tcs);
             if (currentTail == null)
             {
                 this.tail = this.head = write;
@@ -102,7 +102,7 @@ namespace DotNetty.Transport.Channels
             // if the channel was already closed when constructing the PendingWriteQueue.
             // See https://github.com/netty/netty/issues/3967
             this.buffer?.IncrementPendingOutboundBytes(messageSize);
-            return promise.Task;
+            return tcs.Task;
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace DotNetty.Transport.Channels
                 object msg = write.Messages;
                 TaskCompletionSource promise = write.Promise;
                 this.Recycle(write, false);
-                this.ctx.WriteAsync(msg).LinkOutcome(promise);
+                this.ctx.WriteAsync(msg, promise);
                 tasks.Add(promise.Task);
                 write = next;
             }
@@ -220,7 +220,7 @@ namespace DotNetty.Transport.Channels
             object msg = write.Messages;
             TaskCompletionSource promise = write.Promise;
             this.Recycle(write, true);
-            this.ctx.WriteAsync(msg).LinkOutcome(promise);
+            this.ctx.WriteAsync(msg, promise);
             return promise.Task;
         }
 

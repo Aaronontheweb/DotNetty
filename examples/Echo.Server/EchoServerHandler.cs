@@ -6,6 +6,7 @@ namespace Echo.Server
     using System;
     using System.Text;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
 
     public class EchoServerHandler : ChannelHandlerAdapter
@@ -17,7 +18,7 @@ namespace Echo.Server
             {
                 Console.WriteLine("Received from client: " + buffer.ToString(Encoding.UTF8));
             }
-            context.WriteAsync(message);
+            context.WriteAsync(message, TaskCompletionSource.Void);
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context) => context.Flush();

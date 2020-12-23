@@ -68,7 +68,7 @@ namespace DotNetty.Codecs.Http.Tests
                 }
             }
 
-            public override Task WriteAsync(IChannelHandlerContext ctx, object msg)
+            public override Task WriteAsync(IChannelHandlerContext ctx, object msg, TaskCompletionSource tcs)
             {
                 // We ensure that we're in the read call and defer the write so we can
                 // make sure the pipeline was reformed irrespective of the flush completing.
@@ -78,7 +78,7 @@ namespace DotNetty.Codecs.Http.Tests
                 var completion = new TaskCompletionSource();
                 ctx.Channel.EventLoop.Execute(() =>
                 {
-                    ctx.WriteAsync(msg)
+                    ctx.WriteAsync(msg, tcs)
                        .ContinueWith(t =>
                         {
                             if (t.Status == TaskStatus.RanToCompletion)

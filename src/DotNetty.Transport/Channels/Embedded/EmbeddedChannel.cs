@@ -11,6 +11,7 @@ namespace DotNetty.Transport.Channels.Embedded
     using System.Runtime.ExceptionServices;
     using System.Threading.Tasks;
     using DotNetty.Common;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal.Logging;
     using DotNetty.Common.Utilities;
 
@@ -302,7 +303,7 @@ namespace DotNetty.Transport.Channels.Embedded
                 {
                     break;
                 }
-                futures.Add(this.WriteAsync(m));
+                futures.Add(this.WriteAsync(m, new TaskCompletionSource()));
             }
             // We need to call RunPendingTasks first as a IChannelHandler may have used IEventLoop.Execute(...) to
             // delay the write on the next event loop run.

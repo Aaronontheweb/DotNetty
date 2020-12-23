@@ -6,6 +6,7 @@ namespace Echo.Client
     using System;
     using System.Text;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
     using Examples.Common;
 
@@ -20,7 +21,7 @@ namespace Echo.Client
             this.initialMessage.WriteBytes(messageBytes);
         }
 
-        public override void ChannelActive(IChannelHandlerContext context) => context.WriteAndFlushAsync(this.initialMessage);
+        public override void ChannelActive(IChannelHandlerContext context) => context.WriteAndFlushAsync(this.initialMessage, TaskCompletionSource.Void);
 
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
@@ -29,7 +30,7 @@ namespace Echo.Client
             {
                 Console.WriteLine("Received from server: " + byteBuffer.ToString(Encoding.UTF8));
             }
-            context.WriteAsync(message);
+            context.WriteAsync(message, TaskCompletionSource.Void);
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context) => context.Flush();

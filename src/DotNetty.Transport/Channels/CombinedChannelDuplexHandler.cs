@@ -354,17 +354,17 @@ namespace DotNetty.Transport.Channels
             }
         }
 
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        public override Task WriteAsync(IChannelHandlerContext context, object message, TaskCompletionSource tcs)
         {
             Contract.Assert(context == this.outboundCtx.InnerContext);
 
             if (!this.outboundCtx.Removed)
             {
-                return this.OutboundHandler.WriteAsync(this.outboundCtx, message);
+                return this.OutboundHandler.WriteAsync(this.outboundCtx, message, tcs);
             }
             else
             {
-                return this.outboundCtx.WriteAsync(message);
+                return this.outboundCtx.WriteAsync(message, tcs);
             }
         }
 
@@ -491,7 +491,7 @@ namespace DotNetty.Transport.Channels
                 return this;
             }
 
-            public Task WriteAsync(object message) => this.ctx.WriteAsync(message);
+            public Task WriteAsync(object message, TaskCompletionSource tcs) => this.ctx.WriteAsync(message, tcs);
 
             public IChannelHandlerContext Flush()
             {
@@ -499,7 +499,7 @@ namespace DotNetty.Transport.Channels
                 return this;
             }
 
-            public Task WriteAndFlushAsync(object message) => this.ctx.WriteAndFlushAsync(message);
+            public Task WriteAndFlushAsync(object message, TaskCompletionSource tcs) => this.ctx.WriteAndFlushAsync(message, tcs);
 
             public IAttribute<T> GetAttribute<T>(AttributeKey<T> key) where T : class => this.ctx.GetAttribute(key);
 

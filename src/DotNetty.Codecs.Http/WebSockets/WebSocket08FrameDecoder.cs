@@ -9,6 +9,7 @@ namespace DotNetty.Codecs.Http.WebSockets
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal.Logging;
     using DotNetty.Transport.Channels;
 
@@ -396,7 +397,7 @@ namespace DotNetty.Codecs.Http.WebSockets
                 {
                     closeMessage = new CloseWebSocketFrame(1002, null);
                 }
-                ctx.WriteAndFlushAsync(closeMessage)
+                ctx.WriteAndFlushAsync(closeMessage, new TaskCompletionSource())
                     .ContinueWith((t, c) => ((IChannel)c).CloseAsync(),
                         ctx.Channel, TaskContinuationOptions.ExecuteSynchronously);
             }

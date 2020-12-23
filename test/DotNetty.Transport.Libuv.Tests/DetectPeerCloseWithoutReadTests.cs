@@ -172,7 +172,7 @@ namespace DotNetty.Transport.Libuv.Tests
             {
                 IByteBuffer buf = ctx.Allocator.Buffer(this.expectedBytesRead);
                 buf.SetWriterIndex(buf.WriterIndex + this.expectedBytesRead);
-                ctx.WriteAndFlushAsync(buf).ContinueWith(_ => ctx.CloseAsync());
+                ctx.WriteAndFlushAsync(buf, new TaskCompletionSource()).ContinueWith(_ => ctx.CloseAsync());
                 ctx.FireChannelActive();
             }
 

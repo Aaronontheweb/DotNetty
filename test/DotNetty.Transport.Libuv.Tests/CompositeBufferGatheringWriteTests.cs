@@ -132,7 +132,7 @@ namespace DotNetty.Transport.Libuv.Tests
         sealed class ServerHandler : ChannelHandlerAdapter
         {
             public override void ChannelActive(IChannelHandlerContext ctx) =>
-                ctx.WriteAndFlushAsync(NewCompositeBuffer(ctx.Allocator))
+                ctx.WriteAndFlushAsync(NewCompositeBuffer(ctx.Allocator), new TaskCompletionSource())
                    .ContinueWith((t, s) => ((IChannelHandlerContext)s).CloseAsync(), 
                         ctx, TaskContinuationOptions.ExecuteSynchronously);
         }

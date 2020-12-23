@@ -5,6 +5,7 @@ namespace Factorial.Client
 {
     using System.Collections.Concurrent;
     using System.Numerics;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
 
     public class FactorialClientHandler : SimpleChannelInboundHandler<BigInteger>
@@ -35,7 +36,7 @@ namespace Factorial.Client
         {
             for (int i = 0; (i < 4096) && (this.next <= ClientSettings.Count); i++)
             {
-                this.ctx.WriteAsync(new BigInteger(this.next));
+                this.ctx.WriteAsync(new BigInteger(this.next), TaskCompletionSource.Void);
                 this.next++;
             }
             this.ctx.Flush();

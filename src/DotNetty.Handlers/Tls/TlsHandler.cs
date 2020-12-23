@@ -508,20 +508,20 @@ namespace DotNetty.Handlers.Tls
             return oldState.Has(TlsHandlerState.Authenticated);
         }
 
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        public override Task WriteAsync(IChannelHandlerContext context, object message, TaskCompletionSource tcs)
         {
             if (!(message is IByteBuffer))
             {
                 return TaskEx.FromException(new UnsupportedMessageTypeException(message, typeof(IByteBuffer)));
             }
-            return this.pendingUnencryptedWrites.Add(message);
+            return this.pendingUnencryptedWrites.Add(message, tcs);
         }
 
         public override void Flush(IChannelHandlerContext context)
         {
             if (this.pendingUnencryptedWrites.IsEmpty)
             {
-                this.pendingUnencryptedWrites.Add(Unpooled.Empty);
+                this.pendingUnencryptedWrites.Add(Unpooled.Empty, TaskCompletionSource.Void);
             }
 
             if (!this.EnsureAuthenticated())
@@ -606,12 +606,12 @@ namespace DotNetty.Handlers.Tls
                 output.WriteBytes(buffer, offset, count);
             }
 
-            this.lastContextWriteTask = this.capturedContext.WriteAsync(output);
+            this.lastContextWriteTask = this.capturedContext.WriteAsync(output, new TaskCompletionSource());
         }
 
         Task FinishWrapNonAppDataAsync(byte[] buffer, int offset, int count)
         {
-            var future = this.capturedContext.WriteAndFlushAsync(Unpooled.WrappedBuffer(buffer, offset, count));
+            var future = this.capturedContext.WriteAndFlushAsync(Unpooled.WrappedBuffer(buffer, offset, count), new TaskCompletionSource());
             this.ReadIfNeeded(this.capturedContext);
             return future;
         }

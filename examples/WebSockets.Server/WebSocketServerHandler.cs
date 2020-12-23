@@ -10,6 +10,7 @@ namespace WebSockets.Server
     using DotNetty.Buffers;
     using DotNetty.Codecs.Http;
     using DotNetty.Codecs.Http.WebSockets;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
     using Examples.Common;
@@ -97,21 +98,21 @@ namespace WebSockets.Server
 
             if (frame is PingWebSocketFrame)
             {
-                ctx.WriteAsync(new PongWebSocketFrame((IByteBuffer)frame.Content.Retain()));
+                ctx.WriteAsync(new PongWebSocketFrame((IByteBuffer)frame.Content.Retain()), new TaskCompletionSource());
                 return;
             }
 
             if (frame is TextWebSocketFrame)
             {
                 // Echo the frame
-                ctx.WriteAsync(frame.Retain());
+                ctx.WriteAsync(frame.Retain(), new TaskCompletionSource());
                 return;
             }
 
             if (frame is BinaryWebSocketFrame)
             {
                 // Echo the frame
-                ctx.WriteAsync(frame.Retain());
+                ctx.WriteAsync(frame.Retain(), new TaskCompletionSource());
             }
         }
 

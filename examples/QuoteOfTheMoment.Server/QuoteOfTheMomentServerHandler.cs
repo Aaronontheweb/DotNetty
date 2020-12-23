@@ -6,6 +6,7 @@ namespace QuoteOfTheMoment.Server
     using System;
     using System.Text;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
     using DotNetty.Transport.Channels.Sockets;
 
@@ -45,7 +46,7 @@ namespace QuoteOfTheMoment.Server
 
             byte[] bytes = Encoding.UTF8.GetBytes("QOTM: " + NextQuote());
             IByteBuffer buffer = Unpooled.WrappedBuffer(bytes);
-            ctx.WriteAsync(new DatagramPacket(buffer, packet.Sender));
+            ctx.WriteAsync(new DatagramPacket(buffer, packet.Sender), TaskCompletionSource.Void);
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context) => context.Flush();

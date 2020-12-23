@@ -303,17 +303,17 @@ namespace DotNetty.Handlers.Timeout
             context.FireChannelReadComplete();
         }
 
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        public override Task WriteAsync(IChannelHandlerContext context, object message, TaskCompletionSource tcs)
         {
             if (this.writerIdleTime.Ticks > 0 || this.allIdleTime.Ticks > 0)
             {
-                Task task = context.WriteAsync(message);
+                Task task = context.WriteAsync(message, tcs);
                 task.ContinueWith(this.writeListener, TaskContinuationOptions.ExecuteSynchronously);
 
                 return task;
             }
 
-            return context.WriteAsync(message);
+            return context.WriteAsync(message, tcs);
         }
 
         void Initialize(IChannelHandlerContext context)

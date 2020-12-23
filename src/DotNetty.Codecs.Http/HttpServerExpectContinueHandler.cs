@@ -5,6 +5,7 @@ namespace DotNetty.Codecs.Http
 {
     using System.Threading.Tasks;
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -39,12 +40,12 @@ namespace DotNetty.Codecs.Http
                         // the expectation failed so we refuse the request.
                         IHttpResponse rejection = this.RejectResponse(req);
                         ReferenceCountUtil.Release(message);
-                        context.WriteAndFlushAsync(rejection)
+                        context.WriteAndFlushAsync(rejection, new TaskCompletionSource())
                             .ContinueWith(CloseOnFailure, context, TaskContinuationOptions.ExecuteSynchronously);
                         return;
                     }
 
-                    context.WriteAndFlushAsync(accept)
+                    context.WriteAndFlushAsync(accept, new TaskCompletionSource())
                         .ContinueWith(CloseOnFailure, context, TaskContinuationOptions.ExecuteSynchronously);
                     req.Headers.Remove(HttpHeaderNames.Expect);
                 }

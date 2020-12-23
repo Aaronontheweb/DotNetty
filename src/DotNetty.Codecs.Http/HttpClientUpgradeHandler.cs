@@ -9,6 +9,7 @@ namespace DotNetty.Codecs.Http
     using System.Diagnostics.Contracts;
     using System.Text;
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -72,23 +73,24 @@ namespace DotNetty.Codecs.Http
             this.upgradeCodec = upgradeCodec;
         }
 
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        public override Task WriteAsync(IChannelHandlerContext context, object message, TaskCompletionSource tcs)
         {
             if (!(message is IHttpRequest))
             {
-                return context.WriteAsync(message);
+                return context.WriteAsync(message, tcs);
             }
 
             if (this.upgradeRequested)
             {
-                return TaskEx.FromException(new InvalidOperationException("Attempting to write HTTP request with upgrade in progress"));
+                tcs.TrySetException(new InvalidOperationException("Attempting to write HTTP request with upgrade in progress"));
+                return tcs.Task;
             }
 
             this.upgradeRequested = true;
             this.SetUpgradeRequestHeaders(context, (IHttpRequest)message);
 
             // Continue writing the request.
-            Task task = context.WriteAsync(message);
+            Task task = context.WriteAsync(message, tcs);
 
             // Notify that the upgrade request was issued.
             context.FireUserEventTriggered(UpgradeEvent.UpgradeIssued);

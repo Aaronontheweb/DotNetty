@@ -4,6 +4,7 @@
 namespace DotNetty.Codecs.Http.WebSockets
 {
     using DotNetty.Buffers;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
 
     public class Utf8FrameValidator : ChannelHandlerAdapter
@@ -81,7 +82,7 @@ namespace DotNetty.Codecs.Http.WebSockets
             {
                 if (ctx.Channel.Active)
                 {
-                    ctx.WriteAndFlushAsync(Unpooled.Empty)
+                    ctx.WriteAndFlushAsync(Unpooled.Empty, new TaskCompletionSource())
                         .ContinueWith(t => ctx.Channel.CloseAsync());
                 }
             }

@@ -4,11 +4,12 @@
 namespace DotNetty.Tests.End2End
 {
     using System;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
 
     class EchoChannelHandler : ChannelHandlerAdapter
     {
-        public override void ChannelRead(IChannelHandlerContext context, object message) => context.Channel.WriteAsync(message);
+        public override void ChannelRead(IChannelHandlerContext context, object message) => context.Channel.WriteAsync(message, TaskCompletionSource.Void);
 
         public override void ChannelReadComplete(IChannelHandlerContext context) => context.Channel.Flush();
 

@@ -4,6 +4,7 @@
 namespace DotNetty.Codecs.Http
 {
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -31,7 +32,7 @@ namespace DotNetty.Codecs.Http
             base.ChannelRead(context, message);
         }
 
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        public override Task WriteAsync(IChannelHandlerContext context, object message, TaskCompletionSource tcs)
         {
             // modify message on way out to add headers if needed
             if (message is IHttpResponse response)
@@ -52,10 +53,10 @@ namespace DotNetty.Codecs.Http
             }
             if (message is ILastHttpContent && !this.ShouldKeepAlive())
             {
-                return base.WriteAsync(context, message)
+                return base.WriteAsync(context, message, tcs)
                     .ContinueWith(CloseOnComplete, context, TaskContinuationOptions.ExecuteSynchronously);
             }
-            return base.WriteAsync(context, message);
+            return base.WriteAsync(context, message, tcs);
         }
 
         static Task CloseOnComplete(Task task, object state)

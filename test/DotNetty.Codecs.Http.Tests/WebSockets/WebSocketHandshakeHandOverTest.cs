@@ -70,8 +70,7 @@ namespace DotNetty.Codecs.Http.Tests.WebSockets
                     this.owner.serverHandshakeComplete = complete;
 
                     // immediately send a message to the client on connect
-                    context.WriteAndFlushAsync(new TextWebSocketFrame("abc"))
-                        .LinkOutcome(this.completion);
+                    context.WriteAndFlushAsync(new TextWebSocketFrame("abc"), this.completion);
                 }
             }
 

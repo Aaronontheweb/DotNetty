@@ -6,6 +6,7 @@ namespace DotNetty.Codecs.Http.WebSockets.Extensions
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -19,7 +20,7 @@ namespace DotNetty.Codecs.Http.WebSockets.Extensions
             this.extensionHandshakers = new List<IWebSocketClientExtensionHandshaker>(extensionHandshakers);
         }
 
-        public override Task WriteAsync(IChannelHandlerContext ctx, object msg)
+        public override Task WriteAsync(IChannelHandlerContext ctx, object msg, TaskCompletionSource tcs)
         {
             if (msg is IHttpRequest request && WebSocketExtensionUtil.IsWebsocketUpgrade(request.Headers))
             {
@@ -39,7 +40,7 @@ namespace DotNetty.Codecs.Http.WebSockets.Extensions
                 request.Headers.Set(HttpHeaderNames.SecWebsocketExtensions, headerValue);
             }
 
-            return base.WriteAsync(ctx, msg);
+            return base.WriteAsync(ctx, msg, tcs);
         }
 
         public override void ChannelRead(IChannelHandlerContext ctx, object msg)

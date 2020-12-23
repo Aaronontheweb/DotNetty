@@ -12,6 +12,7 @@ namespace DotNetty.Codecs.Http
     using System.Threading.Tasks;
     using DotNetty.Buffers;
     using DotNetty.Common;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
 
@@ -254,7 +255,7 @@ namespace DotNetty.Codecs.Http
             var upgradeEvent = new UpgradeEvent(upgradeProtocol, request);
 
             IUpgradeCodec finalUpgradeCodec = upgradeCodec;
-            ctx.WriteAndFlushAsync(upgradeResponse).ContinueWith(t =>
+            ctx.WriteAndFlushAsync(upgradeResponse, new TaskCompletionSource()).ContinueWith(t =>
                 {
                     try
                     {

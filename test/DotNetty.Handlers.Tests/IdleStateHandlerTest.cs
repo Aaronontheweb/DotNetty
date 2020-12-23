@@ -106,7 +106,7 @@ namespace DotNetty.Handlers.Tests
             var idleStateHandler = new TestableIdleStateHandler(
                     false, this.zeroSecond, this.oneSecond, this.zeroSecond);
 
-            Action<EmbeddedChannel> action = (channel) => channel.WriteAndFlushAsync("Hello, World!");
+            Action<EmbeddedChannel> action = (channel) => channel.WriteAndFlushAsync("Hello, World!", new TaskCompletionSource());
 
             this.AnyNotIdle(idleStateHandler, action, IdleStateEvent.FirstWriterIdleStateEvent);
         }
@@ -199,9 +199,9 @@ namespace DotNetty.Handlers.Tests
             try
             {
                 // We're writing 3 messages that will be consumed at different rates!
-                channel.WriteAndFlushAsync(Unpooled.WrappedBuffer(new byte[] { 1 }));
-                channel.WriteAndFlushAsync(Unpooled.WrappedBuffer(new byte[] { 2 }));
-                channel.WriteAndFlushAsync(Unpooled.WrappedBuffer(new byte[] { 3 }));
+                channel.WriteAndFlushAsync(Unpooled.WrappedBuffer(new byte[] { 1 }), TaskCompletionSource.Void);
+                channel.WriteAndFlushAsync(Unpooled.WrappedBuffer(new byte[] { 2 }), TaskCompletionSource.Void);
+                channel.WriteAndFlushAsync(Unpooled.WrappedBuffer(new byte[] { 3 }), TaskCompletionSource.Void);
 
                 // Establish a baseline. We're not consuming anything and let it idle once.
                 idleStateHandler.TickRun();

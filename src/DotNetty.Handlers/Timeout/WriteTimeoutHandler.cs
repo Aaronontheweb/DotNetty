@@ -83,9 +83,9 @@ namespace DotNetty.Handlers.Timeout
                  : TimeSpan.Zero;
         }
 
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        public override Task WriteAsync(IChannelHandlerContext context, object message, TaskCompletionSource tcs)
         {
-            Task task = context.WriteAsync(message);
+            Task task = context.WriteAsync(message, tcs);
 
             if (this.timeout.Ticks > 0)
             {

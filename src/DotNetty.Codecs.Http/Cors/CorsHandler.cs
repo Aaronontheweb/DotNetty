@@ -6,6 +6,7 @@ namespace DotNetty.Codecs.Http.Cors
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal.Logging;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
@@ -167,7 +168,7 @@ namespace DotNetty.Codecs.Http.Cors
 
         void SetMaxAge(IHttpResponse response) => response.Headers.Set(HttpHeaderNames.AccessControlMaxAge, this.config.MaxAge);
 
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        public override Task WriteAsync(IChannelHandlerContext context, object message, TaskCompletionSource tcs)
         {
             if (this.config.IsCorsSupportEnabled && message is IHttpResponse response)
             {
@@ -177,7 +178,7 @@ namespace DotNetty.Codecs.Http.Cors
                     this.SetExposeHeaders(response);
                 }
             }
-            return context.WriteAndFlushAsync(message);
+            return context.WriteAndFlushAsync(message, tcs);
         }
 
         static void Forbidden(IChannelHandlerContext ctx, IHttpRequest request)
@@ -194,7 +195,7 @@ namespace DotNetty.Codecs.Http.Cors
 
             HttpUtil.SetKeepAlive(response, keepAlive);
 
-            Task task = ctx.WriteAndFlushAsync(response);
+            Task task = ctx.WriteAndFlushAsync(response, new TaskCompletionSource());
             if (!keepAlive)
             {
                 task.ContinueWith(CloseOnComplete, ctx, 

@@ -6,14 +6,15 @@ namespace Telnet.Server
     using System;
     using System.Net;
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Transport.Channels;
 
     public class TelnetServerHandler : SimpleChannelInboundHandler<string>
     {
         public override void ChannelActive(IChannelHandlerContext contex)
         {
-            contex.WriteAsync(string.Format("Welcome to {0} !\r\n", Dns.GetHostName()));
-            contex.WriteAndFlushAsync(string.Format("It is {0} now !\r\n", DateTime.Now));
+            contex.WriteAsync(string.Format("Welcome to {0} !\r\n", Dns.GetHostName()), TaskCompletionSource.Void);
+            contex.WriteAndFlushAsync(string.Format("It is {0} now !\r\n", DateTime.Now), TaskCompletionSource.Void);
         }
 
         protected override void ChannelRead0(IChannelHandlerContext contex, string msg)
@@ -35,7 +36,7 @@ namespace Telnet.Server
                 response = "Did you say '" + msg + "'?\r\n";
             }
 
-            Task wait_close = contex.WriteAndFlushAsync(response);
+            Task wait_close = contex.WriteAndFlushAsync(response, new TaskCompletionSource());
             if (close)
             {
                 Task.WaitAll(wait_close);
